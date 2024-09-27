@@ -1,13 +1,13 @@
-import paho.mqtt.client as mqtt
+#import paho.mqtt.client as mqtt
 import json
 import time
 import random
 STATUS_FILE_PATH = 'battery & tyre_status.json'
 
-# MQTT Configuration
-broker = "localhost"
-port = 1883
-topic = "battery & tyre_status"
+# # MQTT Configuration
+# broker = "localhost"
+# port = 1883
+# topic = "battery & tyre_status"
 
 # Sample battery data
 battery_data = {
@@ -40,8 +40,8 @@ def save_battery_status():
 
 def publish_battery_data():
     """Publish battery data to the MQTT topic."""
-    client = mqtt.Client()
-    client.connect(broker, port, 60)
+    #client = mqtt.Client()
+ #   client.connect(broker, port, 60)
     while True:
         # Simulate real-time updates to battery status
         # battery_data["Battery"]["CellVoltage"] += 0.01 
@@ -52,7 +52,7 @@ def publish_battery_data():
         save_battery_status()  # Save to the JSON file
 
         # Publish the data as JSON
-        client.publish(topic, json.dumps(battery_data))
+    #    client.publish(topic, json.dumps(battery_data))
         print(f"Published: {battery_data}")
 
         time.sleep(0.7)  # Publish interval, can be modified as per our requirement
