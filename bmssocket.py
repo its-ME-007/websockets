@@ -23,7 +23,7 @@ def load_battery_status():
 def broadcast_updates():
     """Continuously check for updates in the JSON file and broadcast them."""
     global last_status
-    while True:
+    while True:        
         new_status = load_battery_status()
         # Only broadcast if the status has changed
         if new_status != last_status:
