@@ -21,18 +21,22 @@ def load_external_lighting_status():
     except FileNotFoundError:
         current_status = {"External": {}}
 
+def status_to_string(status_value):
+    """Convert the status value to a string ("OFF" for 0, "ON" for 1)."""
+    return "ON" if status_value == 1 else "OFF"
+
 def broadcast_external_updates():
     """Continuously check for updates in the JSON file and broadcast them."""
     global last_status
     while True:
         if current_status != last_status:
             last_status = current_status.copy()  # Track the new status
-            # Broadcast each lighting status to all connected clients
-            socketio.emit('headlights_status', {"HeadlightsStatus": current_status["External"].get("Headlights", {}).get("Status", 0)})
-            socketio.emit('taillights_status', {"TailLightsStatus": current_status["External"].get("TailLights", {}).get("Status", 0)})
-            socketio.emit('brakelights_status', {"BrakeLightsStatus": current_status["External"].get("BrakeLights", {}).get("Status", 0)})
-            socketio.emit('turnsignals_status', {"TurnSignalsStatus": current_status["External"].get("TurnSignals", {}).get("Status", 0)})
-            socketio.emit('foglights_status', {"FogLightsStatus": current_status["External"].get("FogLights", {}).get("Status", 0)})
+            # Convert status values and broadcast to all connected clients
+            socketio.emit('headlights_status', {"HeadlightsStatus": status_to_string(current_status["External"].get("Headlights", {}).get("Status", 0))})
+            socketio.emit('taillights_status', {"TailLightsStatus": status_to_string(current_status["External"].get("TailLights", {}).get("Status", 0))})
+            socketio.emit('brakelights_status', {"BrakeLightsStatus": status_to_string(current_status["External"].get("BrakeLights", {}).get("Status", 0))})
+            socketio.emit('turnsignals_status', {"TurnSignalsStatus": status_to_string(current_status["External"].get("TurnSignals", {}).get("Status", 0))})
+            socketio.emit('foglights_status', {"FogLightsStatus": status_to_string(current_status["External"].get("FogLights", {}).get("Status", 0))})
         time.sleep(10)  # Check every 10 seconds
 
 # Serve the HTML template
