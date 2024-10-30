@@ -48,6 +48,9 @@ def broadcast_updates():
 def index():
     return render_template('index.html')
 
+# Testing based websocket message recievers for backend test. 
+# IF U'RE FROM THE FRONTEND TEAM, PLS IGNORE THIS PART...THIS ARE CLIENT SIDE EVENTS I BUILT FOR TESTING MY CODE.
+'''
 # WebSocket route to get battery voltage (and other values, if needed)
 @socketio.on('get_voltage')
 def get_battery_voltage():
@@ -120,7 +123,7 @@ def get_battery_error_status():
 @socketio.on('get_temperature')
 def get_battery_temperature():
     status = load_battery_status()
-    emit('battery_temperature', {"Temperature": status["Battery"].get("Temperature", 0)})
+    emit('battery_temperature', {"Temperature": status["Battery"].get("Temperature", 0)})'''
 
 if __name__ == "__main__":
     # Start the background thread to check for updates
