@@ -7,7 +7,7 @@ import threading
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-STAT_FILE_PATH = 'battery & tyre_status.json'
+STAT_FILE_PATH = 'tyre_status.json'
 last_status = None
 
 def load_tyre_status():
@@ -19,6 +19,9 @@ def load_tyre_status():
         status = {"Tyre": {}}
     return status
 
+def validate_tyre_pressure(pressure):
+    """Validate that the tyre pressure is between 0 and 50."""
+    return 0 <= pressure <= 50
 
 def broadcast_updates():
     """Continuously check for updates in the JSON file and broadcast them."""
@@ -28,36 +31,15 @@ def broadcast_updates():
         # Only broadcast if the status has changed
         if new_status != last_status:
             last_status = new_status
-            # Broadcast each value to all connected clients
-            socketio.emit('front_right', {"Right_Front": new_status["Tyre"].get("Right_Front", 0)})
-            socketio.emit('front_left', {"Left_Front": new_status["Tyre"].get("Left_Front", 0)})
-            socketio.emit('back_right', {"Right_Back": new_status["Tyre"].get("Right_Back", 0)})
-            socketio.emit('back_left', {"Left_Back": new_status["Tyre"].get("Left_Back", 0)})
+            # Broadcast each value to all connected clients if it's within range
+            for tyre, value in new_status["Tyre"].items():
+                if validate_tyre_pressure(value):
+                    socketio.emit(tyre.lower(), {tyre: value})
         time.sleep(0.1)  # Check every 0.1 seconds
 
 @app.route('/')
 def index():
     return render_template('index1.html')
-
-@socketio.on('front_right')
-def get_fr_tyre_stat():
-    status = load_tyre_status()
-    emit('front_right', {"Right_Front": status["Tyre"].get("Right_Front", 0)})
-
-@socketio.on('front_left')
-def get_fl_tyre_stat():
-    status = load_tyre_status()
-    emit('front_left', {"Left_Front": status["Tyre"].get("Left_Front", 0)})
-
-@socketio.on('back_right')
-def get_br_tyre_stat():
-    status = load_tyre_status()
-    emit('back_right', {"Right_Back": status["Tyre"].get("Right_Back", 0)})
-
-@socketio.on('back_left')
-def get_bl_tyre_stat():
-    status = load_tyre_status()
-    emit('back_left', {"Left_Back": status["Tyre"].get("Left_Back", 0)})
 
 if __name__ == "__main__":
     update_thread = threading.Thread(target=broadcast_updates)
