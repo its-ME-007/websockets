@@ -2,7 +2,7 @@
     "Battery": {
         "Voltage": [
             2.1,
-            2,
+            8,
             2.1,
             2.1,
             2.1,
@@ -29,14 +29,14 @@
         "Current": 4.3,
         "SOC": 85,
         "NumberOfCells": 6,
-        "CellVoltage": 54,
+        "CellVoltage": 45,
         "ChargingMOSFET": "ON",
         "DischargingMOSFET": "ON",
         "CellMinimumVoltage": 2.1,
         "CellMaximumVoltage": 2.2,
         "Capacity": 55,
         "ERRORStatus": 0,
-        "Temperature": 81
+        "Temperature": 70
     },
     "Tyre": {
         "Right_Front": 7,
