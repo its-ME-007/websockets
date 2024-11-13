@@ -46,3 +46,4 @@ if __name__ == "__main__":
     update_thread.daemon = True
     update_thread.start()
     socketio.run(app, debug=True)
+

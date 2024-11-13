@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Management System Status</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .status {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Battery Management System Status</h1>
+    <div class="status">
+        <p><strong>Battery Voltage:</strong> <span id="battery-voltage">Loading...</span> V</p>
+        <p><strong>Battery Current:</strong> <span id="battery-current">Loading...</span> A</p>
+        <p><strong>SOC:</strong> <span id="battery-soc">Loading...</span> %</p>
+        <p><strong>Number of Cells:</strong> <span id="battery-cells">Loading...</span></p>
+        <p><strong>Cell Voltage:</strong> <span id="cell-voltage">Loading...</span> V</p>
+        <p><strong>Charging MOSFET:</strong> <span id="charging-mosfet">Loading...</span></p>
+        <p><strong>Discharging MOSFET:</strong> <span id="discharging-mosfet">Loading...</span></p>
+        <p><strong>Min Cell Voltage:</strong> <span id="min-voltage">Loading...</span> V</p>
+        <p><strong>Max Cell Voltage:</strong> <span id="max-voltage">Loading...</span> V</p>
+        <p><strong>Battery Capacity:</strong> <span id="battery-capacity">Loading...</span> Ah</p>
+        <p><strong>Battery Error Status:</strong> <span id="battery-error-status">Loading...</span></p>
+        <p><strong>Battery Temperature:</strong> <span id="battery-temperature">Loading...</span> °C</p>
+    </div>
+
+    <script>
+        const socket = io();
+
+        function updateValue(id, value) {
+            document.getElementById(id).textContent = value;
+        }
+
+        function handleError() {
+            window.location.href = "/error";
+        }
+
+        // Listen for each battery attribute update
+        socket.on('battery_voltage', data => {
+            if (!data || data.Voltage < 0 || data.Voltage > 100) return handleError();
+            updateValue('battery-voltage', data.Voltage);
+        });
+
+        socket.on('battery_current', data => {
+            if (!data || data.Current < -500 || data.Current > 500) return handleError();
+            updateValue('battery-current', data.Current);
+        });
+
+        socket.on('battery_soc', data => {
+            if (!data || data.SOC < 0 || data.SOC > 100) return handleError();
+            updateValue('battery-soc', data.SOC);
+        });
+
+        socket.on('battery_number_of_cells', data => {
+            if (!data || data.NumberOfCells < 0 || data.NumberOfCells > 40) return handleError();
+            updateValue('battery-cells', data.NumberOfCells);
+        });
+
+        socket.on('battery_cell_voltage', data => {
+            if (!data || data.CellVoltage < 0 || data.CellVoltage > 5) return handleError();
+            updateValue('cell-voltage', data.CellVoltage);
+        });
+
+        socket.on('battery_charging_mosfet', data => {
+            if (!data || (data.ChargingMOSFET !== "ON" && data.ChargingMOSFET !== "OFF")) return handleError();
+            updateValue('charging-mosfet', data.ChargingMOSFET);
+        });
+
+        socket.on('battery_discharging_mosfet', data => {
+            if (!data || (data.DischargingMOSFET !== "ON" && data.DischargingMOSFET !== "OFF")) return handleError();
+            updateValue('discharging-mosfet', data.DischargingMOSFET);
+        });
+
+        socket.on('battery_minimum_voltage', data => {
+            if (!data || data.CellMinimumVoltage < 0 || data.CellMinimumVoltage > 5) return handleError();
+            updateValue('min-voltage', data.CellMinimumVoltage);
+        });
+
+        socket.on('battery_maximum_voltage', data => {
+            if (!data || data.CellMaximumVoltage < 0 || data.CellMaximumVoltage > 5) return handleError();
+            updateValue('max-voltage', data.CellMaximumVoltage);
+        });
+
+        socket.on('battery_capacity', data => {
+            if (!data || data.Capacity < 0 || data.Capacity > 300) return handleError();
+            updateValue('battery-capacity', data.Capacity);
+        });
+
+        socket.on('battery_error_status', data => {
+            if (!data || data.ERRORStatus < 0 || data.ERRORStatus > 255) return handleError();
+            updateValue('battery-error-status', data.ERRORStatus);
+        });
+
+        socket.on('battery_temperature', data => {
+            if (!data || data.Temperature < 0 || data.Temperature > 100) return handleError();
+            updateValue('battery-temperature', data.Temperature);
+        });
+    </script>
+</body>
+</html>
