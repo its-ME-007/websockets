@@ -2,7 +2,7 @@
 import json
 import time
 import random
-STATUS_FILE_PATH = 'battery & tyre_status.json'
+STATUS_FILE_PATH = 'battery_status.json'
 
 # # MQTT Configuration
 # broker = "localhost"
