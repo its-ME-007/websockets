@@ -1,18 +1,14 @@
 import json
 import time
-import threading
-from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
+from flask import render_template, Blueprint
+from socketio_instance import socketio  
 
-app = Flask(__name__)
-socketio = SocketIO(app)
-
-# Path to the JSON file that contains the internal lighting status
-STATUS_FILE_PATH = 'status.json'
+int_lighting_bp = Blueprint ('intlightsocket',__name__)
+STATUS_FILE_PATH = 'can_data.json'
 last_status = None  # Keep track of the last status to detect changes
 current_status = None  # Store the currently loaded status in memory
 
-def load_lighting_status():
+def load_internal_lighting_status():
     """Load the internal lighting status from the JSON file."""
     global current_status
     try:
@@ -21,7 +17,7 @@ def load_lighting_status():
     except FileNotFoundError:
         current_status = {"Internal": {}}
 
-def broadcast_updates():
+def broadcast_internal_updates():
     """Continuously check for updates in the JSON file and broadcast them."""
     global last_status
     while True:
@@ -38,21 +34,9 @@ def broadcast_updates():
             socketio.emit('dashboardlights_status', {"DashboardLightsStatus": current_status["Internal"].get("DashboardLights", {}).get("Status", 0)})
             socketio.emit('dashboardlights_brightness', {"DashboardLightsBrightness": current_status["Internal"].get("DashboardLights", {}).get("Brightness", 0)})
             socketio.emit('bootlights_status', {"BootLightsStatus": current_status["Internal"].get("BootLights", {}).get("Status", 0)})
-        time.sleep(0.5)  # Check every 10 seconds
+        time.sleep(0.5)  
 
 # Serve the HTML template
-@app.route('/')
+@int_lighting_bp.route('/')
 def index():
     return render_template('index_lighting.html')
-
-if __name__ == "__main__":
-    # Load the initial status from the JSON file
-    load_lighting_status()
-    
-    # Start the background thread to check for updates
-    update_thread = threading.Thread(target=broadcast_updates)
-    update_thread.daemon = True
-    update_thread.start()
-
-    # Run the Flask-SocketIO application
-    socketio.run(app, debug=True)

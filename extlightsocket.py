@@ -1,13 +1,9 @@
 import json
 import time
-import threading
-from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
+from flask import render_template, Blueprint
+from socketio_instance import socketio  
 
-app = Flask(__name__)
-socketio = SocketIO(app)
-
-# Path to the JSON file that contains the external lighting status
+ext_lighting_bp = Blueprint("extlightsocket", __name__)
 STATUS_FILE_PATH = 'ext_status.json'
 last_status = None  # Keep track of the last status to detect changes
 current_status = None  # Store the currently loaded status in memory
@@ -37,21 +33,9 @@ def broadcast_external_updates():
             socketio.emit('brakelights_status', {"BrakeLightsStatus": status_to_string(current_status["External"].get("BrakeLights", {}).get("Status", 0))})
             socketio.emit('turnsignals_status', {"TurnSignalsStatus": status_to_string(current_status["External"].get("TurnSignals", {}).get("Status", 0))})
             socketio.emit('foglights_status', {"FogLightsStatus": status_to_string(current_status["External"].get("FogLights", {}).get("Status", 0))})
-        time.sleep(10)  # Check every 10 seconds
+        time.sleep(1)  # Check every 10 seconds
 
 # Serve the HTML template
-@app.route('/')
+@ext_lighting_bp.route('/')
 def index():
     return render_template('index_extlighting.html')
-
-if __name__ == "__main__":
-    # Load the initial status from the JSON file
-    load_external_lighting_status()
-    
-    # Start the background thread to check for updates
-    update_thread = threading.Thread(target=broadcast_external_updates)
-    update_thread.daemon = True
-    update_thread.start()
-
-    # Run the Flask-SocketIO application
-    socketio.run(app, debug=True)
