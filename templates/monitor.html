@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Monitor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        .service {
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .connected { background-color: #90EE90; }
+        .disconnected { background-color: #FFB6C1; }
+        .data-display {
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f5f5f5;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Monitor</h1>
+    
+    <!-- Internal Lighting Service -->
+    <div id="internal-service" class="service disconnected">
+        <h2>Internal Lighting (Port 5001)</h2>
+        <div>Status: <span id="status-5001">Disconnected</span></div>
+        <div>Last Update: <span id="timestamp-5001">Never</span></div>
+        <h3>Data:</h3>
+        <div id="data-5001" class="data-display">No data received</div>
+    </div>
+
+    <!-- External Lighting Service -->
+    <div id="external-service" class="service disconnected">
+        <h2>External Lighting (Port 5002)</h2>
+        <div>Status: <span id="status-5002">Disconnected</span></div>
+        <div>Last Update: <span id="timestamp-5002">Never</span></div>
+        <h3>Data:</h3>
+        <div id="data-5002" class="data-display">No data received</div>
+    </div>
+
+    <!-- Battery Service -->
+    <div id="battery-service" class="service disconnected">
+        <h2>Battery Management (Port 5003)</h2>
+        <div>Status: <span id="status-5003">Disconnected</span></div>
+        <div>Last Update: <span id="timestamp-5003">Never</span></div>
+        <h3>Data:</h3>
+        <div id="data-5003" class="data-display">No data received</div>
+    </div>
+
+    <!-- Tyre Service -->
+    <div id="tyre-service" class="service disconnected">
+        <h2>Tyre Pressure (Port 5004)</h2>
+        <div>Status: <span id="status-5004">Disconnected</span></div>
+        <div>Last Update: <span id="timestamp-5004">Never</span></div>
+        <h3>Data:</h3>
+        <div id="data-5004" class="data-display">No data received</div>
+    </div>
+
+    <script>
+        const sockets = {};
+
+        // Automatically connect to all services on page load
+        window.onload = function() {
+            connect(5001, 'internal');
+            connect(5002, 'external');
+            connect(5003, 'battery');
+            connect(5004, 'tyre');
+        };
+
+        function connect(port, service) {
+            if (sockets[port]) {
+                console.log(`Already connected to port ${port}`);
+                return;
+            }
+
+            const socket = io(`http://localhost:${port}`, {
+                transports: ['websocket', 'polling'],
+                cors: {
+                    origin: "http://localhost:5000",
+                    methods: ["GET", "POST"],
+                    credentials: true
+                },
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000
+            });
+
+            sockets[port] = socket;
+
+            socket.on('connect', () => {
+                console.log(`Connected to port ${port}`);
+                document.getElementById(`status-${port}`).textContent = 'Connected';
+                document.getElementById(`${service}-service`).classList.remove('disconnected');
+                document.getElementById(`${service}-service`).classList.add('connected');
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error(`Connection error on port ${port}:`, error);
+                document.getElementById(`status-${port}`).textContent = 'Error: ' + error.message;
+                document.getElementById(`${service}-service`).classList.remove('connected');
+                document.getElementById(`${service}-service`).classList.add('disconnected');
+            });
+
+            socket.on('error', (error) => {
+                console.error(`Socket error on port ${port}:`, error);
+            });
+
+            socket.on('disconnect', (reason) => {
+                console.log(`Disconnected from port ${port}. Reason: ${reason}`);
+                document.getElementById(`status-${port}`).textContent = 'Disconnected';
+                document.getElementById(`${service}-service`).classList.remove('connected');
+                document.getElementById(`${service}-service`).classList.add('disconnected');
+            });
+
+            // Listen for service-specific events
+            socket.on(service.toLowerCase(), (data) => {
+                const timestamp = new Date().toLocaleTimeString();
+                document.getElementById(`timestamp-${port}`).textContent = timestamp;
+                document.getElementById(`data-${port}`).textContent = JSON.stringify(data, null, 2);
+                console.log(`Received ${service} data:`, data);
+            });
+        }
+
+        function disconnect(port) {
+            if (sockets[port]) {
+                sockets[port].disconnect();
+                delete sockets[port];
+            }
+        }
+    </script>
+</body>
+</html>

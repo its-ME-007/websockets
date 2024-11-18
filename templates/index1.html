@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tyre Pressure Monitoring</title>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js" integrity="sha384-Xz5H4F5U+kaJeDO3LQ0d4wzyD+DrTWcXleKnF5phu5lTLhoR2VFZk/WGbqNpZ4r9" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .tyre {
+            margin: 10px 0;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tyre Pressure Monitoring System</h1>
+    <div id="tyres">
+        <!-- Tyre data will be dynamically added here -->
+    </div>
+
+    <script>
+        const socket = io('/tyre_pressure');
+
+        // Function to update tyre pressure display
+        function updateTyrePressure(tyre, value) {
+            const tyreDiv = document.getElementById(tyre);
+            if (tyreDiv) {
+                tyreDiv.textContent = `${tyre}: ${value} PSI`;
+            } else {
+                const newTyreDiv = document.createElement('div');
+                newTyreDiv.id = tyre;
+                newTyreDiv.className = 'tyre';
+                newTyreDiv.textContent = `${tyre}: ${value} PSI`;
+                document.getElementById('tyres').appendChild(newTyreDiv);
+            }
+        }
+
+        // Listen for updates from the server
+        socket.onAny((tyre, data) => {
+            updateTyrePressure(tyre, data[tyre]);
+        });
+    </script>
+</body>
+</html>

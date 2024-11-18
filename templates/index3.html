@@ -7,82 +7,110 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        var socket = io.connect(
-          "http://" + document.domain + ":" + location.port
-        );
+        const socket = io.connect("http://" + document.domain + ":" + location.port);
 
-        // Update HTML content when receiving new data from the server
-        socket.on("battery_voltage", function (data) {
-          document.getElementById("battery_voltage").textContent = data.Voltage;
-        });
+        // Update a specific element's content
+        function updateElement(id, content) {
+          const element = document.getElementById(id);
+          if (element) {
+            element.textContent = content;
+          }
+        }
 
+        // Listen for voltage updates for each cell
+        for (let i = 1; i <= 24; i++) {
+          socket.on(`battery_voltage_${i}`, function (data) {
+            updateElement(`battery_voltage_${i}`, data.Voltage + " V");
+          });
+        }
+
+        // Listen for other updates
         socket.on("battery_current", function (data) {
-          document.getElementById("battery_current").textContent = data.Current;
+          updateElement("battery_current", data.Current + " A");
         });
 
         socket.on("battery_soc", function (data) {
-          document.getElementById("battery_soc").textContent = data.SOC + "%";
+          updateElement("battery_soc", data.SOC + " %");
         });
 
         socket.on("battery_number_of_cells", function (data) {
-          document.getElementById("battery_number_of_cells").textContent =
-            data.NumberOfCells;
+          updateElement("battery_number_of_cells", data.NumberOfCells);
         });
 
         socket.on("battery_cell_voltage", function (data) {
-          document.getElementById("battery_cell_voltage").textContent =
-            data.CellVoltage + " V";
+          updateElement("battery_cell_voltage", data.CellVoltage + " V");
         });
 
         socket.on("battery_charging_mosfet", function (data) {
-          document.getElementById("battery_charging_mosfet").textContent =
-            data.ChargingMOSFET;
+          updateElement("battery_charging_mosfet", data.ChargingMOSFET);
         });
 
         socket.on("battery_discharging_mosfet", function (data) {
-          document.getElementById("battery_discharging_mosfet").textContent =
-            data.DischargingMOSFET;
+          updateElement("battery_discharging_mosfet", data.DischargingMOSFET);
         });
 
         socket.on("battery_minimum_voltage", function (data) {
-          document.getElementById("battery_minimum_voltage").textContent =
-            data.CellMinimumVoltage + " V";
+          updateElement("battery_minimum_voltage", data.CellMinimumVoltage + " V");
         });
 
         socket.on("battery_maximum_voltage", function (data) {
-          document.getElementById("battery_maximum_voltage").textContent =
-            data.CellMaximumVoltage + " V";
+          updateElement("battery_maximum_voltage", data.CellMaximumVoltage + " V");
         });
 
         socket.on("battery_capacity", function (data) {
-          document.getElementById("battery_capacity").textContent =
-            data.Capacity + " Ah";
+          updateElement("battery_capacity", data.Capacity + " Ah");
         });
 
         socket.on("battery_error_status", function (data) {
-          document.getElementById("battery_error_status").textContent =
-            data.ERRORStatus;
+          updateElement("battery_error_status", data.ERRORStatus);
         });
 
         socket.on("battery_temperature", function (data) {
-          document.getElementById("battery_temperature").textContent =
-            data.Temperature + " °C";
+          updateElement("battery_temperature", data.Temperature + " °C");
         });
       });
     </script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      h1 {
+        text-align: center;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      ul li {
+        margin: 10px 0;
+        font-size: 1.2em;
+      }
+    </style>
   </head>
   <body>
     <h1>Battery Management System Status</h1>
     <ul>
-      <li>Voltage: <span id="battery_voltage">0</span> V</li>
+      <!-- Dynamic Voltage Values -->
+      <li>
+        <strong>Cell Voltages:</strong>
+        <ul id="cell_voltages">
+          <!-- Individual cell voltage fields will be dynamically added -->
+          <script>
+            for (let i = 1; i <= 24; i++) {
+              document.write(
+                `<li>Voltage ${i}: <span id="battery_voltage_${i}">0</span> V</li>`
+              );
+            }
+          </script>
+        </ul>
+      </li>
       <li>Current: <span id="battery_current">0</span> A</li>
       <li>State of Charge (SOC): <span id="battery_soc">0</span> %</li>
       <li>Number of Cells: <span id="battery_number_of_cells">0</span></li>
       <li>Cell Voltage: <span id="battery_cell_voltage">0</span> V</li>
       <li>Charging MOSFET: <span id="battery_charging_mosfet">OFF</span></li>
-      <li>
-        Discharging MOSFET: <span id="battery_discharging_mosfet">OFF</span>
-      </li>
+      <li>Discharging MOSFET: <span id="battery_discharging_mosfet">OFF</span></li>
       <li>
         Minimum Cell Voltage: <span id="battery_minimum_voltage">0</span> V
       </li>

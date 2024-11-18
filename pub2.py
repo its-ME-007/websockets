@@ -20,7 +20,7 @@ def save_tyre_status():
 def publish_tyre_pressure():
     while True:
         # Simulate real-time updates to tyre status
-        tyre_status["Tyre"]["Right_Front"] = random.randint(0, 30)
+        tyre_status["Internal"]["Right_Front"] = random.randint(0, 30)
         tyre_status["Tyre"]["Right_Back"] = random.randint(0, 30)
         tyre_status["Tyre"]["Left_Front"] = random.randint(0, 30)
         tyre_status["Tyre"]["Left_Back"] = random.randint(0, 30)

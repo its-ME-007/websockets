@@ -39,23 +39,15 @@ def save_battery_status():
         json.dump(battery_data, file, indent=4)
 
 def publish_battery_data():
-    """Publish battery data to the MQTT topic."""
-    #client = mqtt.Client()
- #   client.connect(broker, port, 60)
     while True:
-        # Simulate real-time updates to battery status
-        # battery_data["Battery"]["CellVoltage"] += 0.01 
-        # battery_data["Battery"]["Temperature"] -= 0.1
         battery_data["Battery"]["Voltage"][1] = random.randint(0,8)
         battery_data["Battery"]["CellVoltage"] = random.randrange(0,100)
         battery_data["Battery"]["Temperature"] = random.randrange(0,100)
         save_battery_status()  # Save to the JSON file
 
-        # Publish the data as JSON
-    #    client.publish(topic, json.dumps(battery_data))
         print(f"Published: {battery_data}")
 
-        time.sleep(0.7)  # Publish interval, can be modified as per our requirement
-
+        time.sleep(0.7)  
+        
 if __name__ == "__main__":
     publish_battery_data()

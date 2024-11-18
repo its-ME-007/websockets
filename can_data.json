@@ -1,0 +1,52 @@
+{
+  "Battery": {
+      "Voltage_1": 2.5, 
+      "Voltage_2": 2.5,
+      "Voltage_3": 2.5, 
+      "Voltage_4": 2.5, 
+      "Voltage_5": 2.5, 
+      "Voltage_6": 2.5, 
+      "Voltage_7": 2.5, 
+      "Voltage_8": 2.5, 
+      "Voltage_9": 2.5, 
+      "Voltage_10": 2.5, 
+      "Voltage_11": 2.5, 
+      "Voltage_12": 2.5, 
+      "Voltage_13": 2.5, 
+      "Voltage_14": 2.5, 
+      "Voltage_15": 2.5, 
+      "Voltage_16": 2.5, 
+      "Voltage_17": 2.5, 
+      "Voltage_18": 2.5, 
+      "Voltage_19": 2.5, 
+      "Voltage_20": 2.5, 
+      "Voltage_21": 2.5, 
+      "Voltage_22": 2.5, 
+      "Voltage_23": 2.5, 
+      "Voltage_24": 2.5, 
+      "Current": 4.3,
+      "SOC": 85,
+      "NumberOfCells": 24,  
+      "CellVoltage": 44,  
+      "ChargingMOSFET": "ON",
+      "DischargingMOSFET": "OFF",
+      "CellMinimumVoltage": 2.1,
+      "CellMaximumVoltage": 2.2,
+      "Capacity": 55,
+      "ERRORStatus": 0,
+      "Temperature": 27
+  },
+  "Tyre": {
+      "Right_Front": 7,
+      "Right_Back": 29,
+      "Left_Front": 26,
+      "Left_Back": 29
+  },
+  "Internal": {
+      "RoofLight": {"Status": 0, "Brightness": 50},
+      "DoorPuddleLights": {"Status": 1, "Brightness": 75},
+      "FloorLights": {"Status": 1, "Brightness": 30},
+      "DashboardLights": {"Status": 0, "Brightness": 0},
+      "BootLights": {"Status": 1}
+  }
+}
