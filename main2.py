@@ -6,6 +6,7 @@ from message_manager import MessageManager
 from lighting_services import start_lighting_services
 from bmssocket import start_bms_service
 from tyresocket import start_tyre_service
+from lvl2_cu import start_lvl2_cu
 import logging
 import json
 import os
@@ -55,7 +56,8 @@ def main():
     services = [
         spawn(start_lighting_services, 5001, message_manager),  # Both lighting services on port 5001
         spawn(start_bms_service, 5002, message_manager),        # Adjusted port numbers
-        spawn(start_tyre_service, 5003, message_manager),       # Adjusted port numbers
+        spawn(start_tyre_service, 5003, message_manager),
+        spawn(start_lvl2_cu, 5004, message_manager)             # Adjusted port numbers
     ]
 
     try:

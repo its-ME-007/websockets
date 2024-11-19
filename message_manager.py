@@ -11,6 +11,10 @@ class MessageManager:
         self.data_cache = None
         self.lock = Lock()
         logging.basicConfig(level=logging.INFO)
+        self.valid_ranges = {
+            "cell_voltage": (2.0, 4.2),  # Standard Li-ion cell voltage range
+            "soc": (20, 100)  # From valid_ranges
+        }
         
     def get_data(self):
         """Get the current data from cache or file"""
@@ -22,6 +26,14 @@ class MessageManager:
         try:
             with open(self.file_path, 'r') as file:
                 data = json.load(file)
+                if not self.validate_battery_data(data):
+                    logging.error("Invalid battery data detected")
+                    return self.data_cache or {
+                        "Internal": {},
+                        "External": {},
+                        "Battery": {},
+                        "Tyre": {}
+                    }
                 if data != self.data_cache:
                     logging.info("Data updated in file")
                 return data
@@ -53,7 +65,29 @@ class MessageManager:
                 time.sleep(1)
 
     def broadcast_updates(self):
-        if self.socketio:  # Check if socketio is initialized
+        if self.socketio:
             for category, data in self.data_cache.items():
                 category_event = category.lower()
-                self.socketio.emit(category_event, data)  # Broadcast category data
+                self.socketio.emit(category_event, data)
+
+    def validate_battery_data(self, data):
+        """Validate battery data against defined ranges"""
+        if "Battery" not in data:
+            return False
+        
+        battery = data["Battery"]
+        
+        # Validate SOC
+        if not (self.valid_ranges["soc"][0] <= battery.get("SOC", 0) <= self.valid_ranges["soc"][1]):
+            logging.warning(f"SOC value {battery.get('SOC')} outside valid range {self.valid_ranges['soc']}")
+            return False
+        
+        # Validate all cell voltages
+        for i in range(1, 25):
+            voltage_key = f"Voltage_{i}"
+            voltage = battery.get(voltage_key, 0)
+            if not (self.valid_ranges["cell_voltage"][0] <= voltage <= self.valid_ranges["cell_voltage"][1]):
+                logging.warning(f"{voltage_key} value {voltage} outside valid range {self.valid_ranges['cell_voltage']}")
+                return False
+        
+        return True
