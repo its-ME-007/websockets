@@ -13,7 +13,8 @@ class MessageManager:
         logging.basicConfig(level=logging.INFO)
         self.valid_ranges = {
             "cell_voltage": (2.0, 4.2),  # Standard Li-ion cell voltage range
-            "soc": (20, 100)  # From valid_ranges
+            "soc": (20, 100),  # From valid_ranges
+            "tyre_pressure": (28, 35)  # Valid tyre pressure range in PSI
         }
         
     def get_data(self):
@@ -26,8 +27,8 @@ class MessageManager:
         try:
             with open(self.file_path, 'r') as file:
                 data = json.load(file)
-                if not self.validate_battery_data(data):
-                    logging.error("Invalid battery data detected")
+                if not self.validate_battery_data(data) or not self.validate_tyre_data(data):
+                    logging.error("Invalid data detected")
                     return self.data_cache or {
                         "Internal": {},
                         "External": {},
@@ -88,6 +89,22 @@ class MessageManager:
             voltage = battery.get(voltage_key, 0)
             if not (self.valid_ranges["cell_voltage"][0] <= voltage <= self.valid_ranges["cell_voltage"][1]):
                 logging.warning(f"{voltage_key} value {voltage} outside valid range {self.valid_ranges['cell_voltage']}")
+                return False
+        
+        return True
+
+    def validate_tyre_data(self, data):
+        """Validate tyre pressure data against defined ranges"""
+        if "Tyre" not in data:
+            return False
+        
+        tyre = data["Tyre"]
+        tyre_positions = ["Right_Front", "Right_Back", "Left_Front", "Left_Back"]
+        
+        for position in tyre_positions:
+            pressure = tyre.get(position, 0)
+            if not (self.valid_ranges["tyre_pressure"][0] <= pressure <= self.valid_ranges["tyre_pressure"][1]):
+                logging.warning(f"Tyre pressure for {position} value {pressure} outside valid range {self.valid_ranges['tyre_pressure']}")
                 return False
         
         return True
